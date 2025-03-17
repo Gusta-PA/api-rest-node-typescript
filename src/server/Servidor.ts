@@ -4,7 +4,7 @@ import { router } from './routes/index'
 const server = express();
 
 server.use(express.json()) // Trás os dados de dentro do BODY
-server.use(router);
+server.use(router); // Fala pro servidor utilizar todas as rotas que cadastrar
 
 export { server }
 
