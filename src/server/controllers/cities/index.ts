@@ -1,4 +1,4 @@
-import * as create from './create'
+import * as create from './Create'
 // Nessa linha, todas as funções que estão em create.ts, virão para cá através de uma única importação chamada create
 
 
