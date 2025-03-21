@@ -15,7 +15,7 @@ const bodyValidation: yup.Schema<ICidade> = yup.object().shape({
 })
 
 interface IFilter {
-    filter: string
+    filter?: string
 }
 
 const queryValidation: yup.Schema<IFilter> = yup.object().shape({
@@ -31,8 +31,8 @@ export const createBodyValidator: RequestHandler = async (req, res, next) => {
         await bodyValidation.validate(req.body, { abortEarly: false }) // abortEarly mostra a qtd de erros que tem de uma vez
         return next() // Se bem sucedida, avança para a próxima função no Routes
     } catch (error) {
+        
         const yupError = error as yup.ValidationError
-
         const errors: Record<string, string> = {} // Criação de um objeto VAZIO para armazenar os erros
 
         yupError.inner.forEach(error => {
@@ -49,20 +49,20 @@ export const createBodyValidator: RequestHandler = async (req, res, next) => {
 
 export const createQueryValidator: RequestHandler = async (req, res, next) => {
     try {
-        await queryValidation.validate(req.body, { abortEarly: false }) // abortEarly mostra a qtd de erros que tem de uma vez
-        return next() // Se bem sucedida, avança para a próxima função no Routes
+        await queryValidation.validate(req.query, { abortEarly: false }) 
+        return next() 
     } catch (error) {
+    
         const yupError = error as yup.ValidationError
-
-        const errors: Record<string, string> = {} // Criação de um objeto VAZIO para armazenar os erros
+        const errors: Record<string, string> = {} 
 
         yupError.inner.forEach(error => {
-            if (!error.path) return // Se for Undefined, retorna
-            errors[error.path] = error.message // Joga a mensagem de erro para dentro do validationErrors
+            if (!error.path) return 
+            errors[error.path] = error.message 
         })
 
         res.status(StatusCodes.BAD_REQUEST).json({
-            errors // Retorna a mensagem dos erros
+            errors 
         })
         return
     }

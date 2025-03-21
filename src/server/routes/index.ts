@@ -12,8 +12,10 @@ router.get('/', (req, res) => { // O navegador só consegue fazer chamadas quand
 })
 
 
-router.post('/cidades', cidadesController.createBodyValidator,
+router.post(
+    '/cidades', 
+    cidadesController.createBodyValidator,
     cidadesController.createQueryValidator, 
     cidadesController.create) // colocando uma função de validação após a requisição, se bem sucedida, realiza o create
 
-export { router };
+export { router }; 
