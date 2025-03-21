@@ -1,4 +1,4 @@
-import { Request, Response } from "express"
+import { Request, RequestHandler, Response } from "express"
 import { StatusCodes } from "http-status-codes"
 import * as yup from 'yup'
 
@@ -14,31 +14,64 @@ const bodyValidation: yup.Schema<ICidade> = yup.object().shape({
     estado: yup.string().required().min(3)
 })
 
-// O Request e Response tem que ser os específicados pelo Express
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export const create = async (req: Request, res: Response) => { // Controler de CRIAÇÃO DE CIDADES, utilizada no Routes
-    let validatedData: ICidade | undefined = undefined;
+interface IFilter {
+    filter: string
+}
 
+const queryValidation: yup.Schema<IFilter> = yup.object().shape({
+    filter: yup.string().required().min(3)
+})
+
+
+// Middleware no Express
+// Realiza processamento de dados após a request, mas antes do envio da resposta do servidor
+
+export const createBodyValidator: RequestHandler = async (req, res, next) => {
     try {
-        validatedData = await bodyValidation.validate(req.body, {abortEarly: false}) // abortEarly mostra a qtd de erros que tem de uma vez
+        await bodyValidation.validate(req.body, { abortEarly: false }) // abortEarly mostra a qtd de erros que tem de uma vez
+        return next() // Se bem sucedida, avança para a próxima função no Routes
     } catch (error) {
         const yupError = error as yup.ValidationError
 
-        const errors: Record<string,string> = {} // Criação de um objeto VAZIO para armazenar os erros
+        const errors: Record<string, string> = {} // Criação de um objeto VAZIO para armazenar os erros
 
-
-        yupError.inner.forEach( error => {
-            if(!error.path) return // Se for Undefined, retorna
+        yupError.inner.forEach(error => {
+            if (!error.path) return // Se for Undefined, retorna
             errors[error.path] = error.message // Joga a mensagem de erro para dentro do validationErrors
         })
-
 
         res.status(StatusCodes.BAD_REQUEST).json({
             errors // Retorna a mensagem dos erros
         })
         return
     }
-    console.log(validatedData) // Ao realizar a tipagem no próprio req.body, não é necessário guardar os dados em uma variável
+}
+
+export const createQueryValidator: RequestHandler = async (req, res, next) => {
+    try {
+        await queryValidation.validate(req.body, { abortEarly: false }) // abortEarly mostra a qtd de erros que tem de uma vez
+        return next() // Se bem sucedida, avança para a próxima função no Routes
+    } catch (error) {
+        const yupError = error as yup.ValidationError
+
+        const errors: Record<string, string> = {} // Criação de um objeto VAZIO para armazenar os erros
+
+        yupError.inner.forEach(error => {
+            if (!error.path) return // Se for Undefined, retorna
+            errors[error.path] = error.message // Joga a mensagem de erro para dentro do validationErrors
+        })
+
+        res.status(StatusCodes.BAD_REQUEST).json({
+            errors // Retorna a mensagem dos erros
+        })
+        return
+    }
+}
+
+// O Request e Response tem que ser os específicados pelo Express
+export const create = (req: Request, res: Response) => { // Controler de CRIAÇÃO DE CIDADES, utilizada no Routes
+    console.log(req.body) // Ao realizar a tipagem no próprio req.body, não é necessário guardar os dados em uma variável
 
     res.send('Create!')
 }
+
